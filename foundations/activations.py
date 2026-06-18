@@ -3,9 +3,6 @@ from numpy.typing import NDArray
 
 
 class Solution:
-    def point_sigmoid(self, x):
-        val = 1/(1 + np.exp(-x))
-        return np.round(val, 5)
 
     def sigmoid(self, z: NDArray[np.float64]) -> NDArray[np.float64]:
         return np.round(1/(1 + np.exp(-z)), 5)
