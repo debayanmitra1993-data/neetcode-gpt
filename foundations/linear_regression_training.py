@@ -25,28 +25,26 @@ class Solution:
         #   3. Update: weights[j] -= learning_rate * gradient
         # Return np.round(final_weights, 5)
         
+        iter_cnt = 0
         weights = initial_weights
-        n_dim = X.shape[1]
-        n_data = X.shape[0]
+        while iter_cnt < num_iterations:
+            grad_w = np.zeros(len(weights))
 
-        for _ in range(num_iterations):
-            
-            # compute predictions
-            Y_pred = X @ weights
-
-            # compute gradients 
-            grad_w = [0]*n_dim
             for rowidx in range(len(X)):
-                x = X[rowidx]
-                y = Y[rowidx]
-                y_pred = Y_pred[rowidx]
-                grad_w += 2*(y_pred - y)*x
-            grad_w = grad_w/n_data
+                x_pt = X[rowidx]
+                pred = np.dot(x_pt, weights)
+                error = Y[rowidx] - pred
+                grad_w += (-2*error)*x_pt
+            grad_w = np.round(grad_w / len(X), 5)
 
-            # update weights
-            weights = weights - (self.learning_rate * grad_w)
+            weights = weights - (grad_w * Solution.learning_rate)
+
+            iter_cnt += 1
         
         return np.round(weights, 5)
+
+
+
 
 
 
