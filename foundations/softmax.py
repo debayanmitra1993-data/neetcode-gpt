@@ -5,12 +5,7 @@ from numpy.typing import NDArray
 class Solution:
 
     def softmax(self, z: NDArray[np.float64]) -> NDArray[np.float64]:
-        # z is a 1D NumPy array of logits
-        # Hint: subtract max(z) for numerical stability before computing exp
-        # return np.round(your_answer, 4)
-        maxval = np.max(z)
-        z = z - maxval
-        sumval = np.sum(np.exp(z))
-        print("sumval = ", sumval)
-
-        return np.round(np.exp(z) / sumval,4)
+        z_norm = z - np.max(z)
+        z_exp = np.exp(z_norm)
+        z_exp_sum = np.sum(z_exp)
+        return np.round(z_exp/z_exp_sum, 4)
