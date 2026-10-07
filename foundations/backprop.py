@@ -16,13 +16,17 @@ class Solution:
         # Forward: z = dot(x, w) + b, y_hat = sigmoid(z)
         # Loss: L = 0.5 * (y_hat - y_true)^2
         # Return: (dL_dw rounded to 5 decimals, dL_db rounded to 5 decimals)
-        grad_w = [0]*len(w)
-        y_pred = self.sigmoid(np.dot(w, x) + b)
+        z = np.dot(x, w) + b
+        y_hat = self.sigmoid(z)
+        
+        grad_w = np.zeros(x.shape[0])
+        grad_b = np.round((y_hat - y_true)*y_hat*(1 - y_hat), 5)
 
-        for dimidx in range(len(grad_w)):
-            grad_w[dimidx] = round((y_pred - y_true)*y_pred*(1 - y_pred)*x[dimidx], 5)
-        grad_b = round((y_pred - y_true)*y_pred*(1 - y_pred), 5)
+        for dimidx in range(len(x)):
+            grad_w[dimidx] = (y_hat - y_true)*y_hat*(1 - y_hat)*x[dimidx]
+        
+        return np.round(grad_w, 5), grad_b
+        
 
-        return (np.array(grad_w), grad_b)
-
+        
 
