@@ -7,13 +7,14 @@ class Solution:
     def reshape(self, to_reshape: TensorType[float]) -> TensorType[float]:
         # Reshape (M, N) tensor to (M*N/2, 2)
         # Use torch.reshape(tensor, new_shape)
-        n_rows, n_cols = to_reshape.shape
-        return torch.reshape(to_reshape, (n_rows * n_cols // 2, 2))
+        m = to_reshape.shape[0]
+        n = to_reshape.shape[1]
+        return torch.reshape(to_reshape, (m * n // 2 , 2))
 
     def average(self, to_avg: TensorType[float]) -> TensorType[float]:
         # Compute column-wise mean (average across rows)
         # Use torch.mean(tensor, dim=0)
-        return torch.mean(to_avg, dim = 0)
+        return torch.mean(to_avg, axis = 0)
 
     def concatenate(self, cat_one: TensorType[float], cat_two: TensorType[float]) -> TensorType[float]:
         # Join two tensors side-by-side along dim=1
