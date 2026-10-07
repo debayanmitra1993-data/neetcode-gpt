@@ -11,5 +11,8 @@ class Solution:
         # Normalize: x_hat = (x - mean) / sqrt(var + eps)
         # Scale and shift: out = gamma * x_hat + beta
         # return np.round(your_answer, 5)
-        z = (x - np.mean(x))/(np.sqrt(np.var(x) + 1e-5))
-        return np.round((z * gamma) + beta , 5)
+        eps = 1e-5
+        x_hat = (x - np.mean(x))/(np.sqrt(np.var(x) + eps))
+
+        z = (x_hat*gamma) + beta
+        return np.round(z, 5)
