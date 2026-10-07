@@ -14,35 +14,29 @@ class Solution:
         # Loss: MSE = (1/n) * sum((y_hat - y)^2)
         # Initialize w = zeros, b = 0
         # return (np.round(w, 5), round(b, 5))
-        n_dim = X.shape[1]
-        weights = np.zeros(n_dim)
+        n_col = X.shape[1]
+        n_row = X.shape[0]
+        weights = np.zeros(n_col)
         bias = 0
+
         for epoch in range(epochs):
-            # compute predictions..
-            y_pred = (X @ weights) + bias
+
+            grad_w = np.zeros(n_col)
+            grad_b = 0
+
+            for rowidx in range(n_row):
+                x_pt = X[rowidx]
+                y_pt = y[rowidx]
+                y_pred_pt = np.dot(x_pt, weights) + bias
+
+                grad_w += 2*(y_pred_pt - y_pt)*x_pt
+                grad_b += 2*(y_pred_pt - y_pt)
             
-            # compute gradients..
-            grad_w, grad_b = self.compute_gradients(X, y_pred, y)
+            grad_w = grad_w/n_row
+            grad_b = grad_b/n_row
 
-            # update weight..
-            weights = weights - (lr * grad_w)
-            bias = bias - (lr * grad_b)
+            weights = weights - (grad_w * lr)
+            bias = bias - (grad_b * lr)
+        
+        return (np.round(weights, 5), np.round(bias, 5))
 
-        return np.round(weights, 5), np.round(bias, 5)
-
-    
-    def compute_gradients(self, X, y_pred, y):
-        grad_w_sum = 0
-        grad_b_sum = 0
-        n_rows = X.shape[0]
-        for rowidx in range(len(X)):
-            x_point = X[rowidx]
-            y_point = y[rowidx]
-            y_pred_point = y_pred[rowidx]
-            grad_w_point = 2 * (y_pred_point - y_point) * (x_point)
-            grad_b_point = 2 * (y_pred_point - y_point)
-            grad_w_sum += grad_w_point
-            grad_b_sum += grad_b_point
-        grad_w = grad_w_sum / n_rows
-        grad_b = grad_b_sum / n_rows
-        return grad_w, grad_b
