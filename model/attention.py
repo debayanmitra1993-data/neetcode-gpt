@@ -1,7 +1,6 @@
 import torch
 import torch.nn as nn
 from torchtyping import TensorType
-import math
 
 class SingleHeadAttention(nn.Module):
 
@@ -10,9 +9,11 @@ class SingleHeadAttention(nn.Module):
         torch.manual_seed(0)
         # Create three linear projections (Key, Query, Value) with bias=False
         # Instantiation order matters for reproducible weights: key, query, value
-        self.k_matrix = nn.Linear(embedding_dim, attention_dim, bias = False)
-        self.q_matrix = nn.Linear(embedding_dim, attention_dim, bias = False)
-        self.v_matrix = nn.Linear(embedding_dim, attention_dim, bias = False)
+        self.attention_dim = attention_dim
+        self.K_matrix = nn.Linear(embedding_dim, attention_dim, bias = False)
+        self.Q_matrix = nn.Linear(embedding_dim, attention_dim, bias = False)
+        self.V_matrix = nn.Linear(embedding_dim, attention_dim, bias = False)
+
 
     def forward(self, embedded: TensorType[float]) -> TensorType[float]:
         # 1. Project input through K, Q, V linear layers
@@ -21,21 +22,15 @@ class SingleHeadAttention(nn.Module):
         #    then masked_fill positions where mask == 0 with float('-inf')
         # 4. Apply softmax(dim=2) to masked scores
         # 5. Return (scores @ V) rounded to 4 decimal places
-        k = self.k_matrix(embedded)
-        q = self.q_matrix(embedded)
-        v = self.v_matrix(embedded)
+        k = self.K_matrix(embedded)
+        q = self.Q_matrix(embedded)
+        v = self.V_matrix(embedded)
 
-        seq_len = k.shape[1]
-        att_dim = k.shape[2]
-
-        att_scores = q @ torch.transpose(k, 2, 1)
-        att_scores = att_scores / math.sqrt(att_dim)
-
-        causal_mask = torch.tril(torch.ones(seq_len, seq_len))
-        att_scores = att_scores.masked_fill(causal_mask == 0, float("-inf"))
-        att_scores = nn.functional.softmax(att_scores, dim = 2)
+        att_scores = q @ torch.transpose(k, 1, 2) 
+        att_scores = att_scores / math.sqrt(self.attention_dim)
         
-        return torch.round(att_scores @ v, decimals = 4) 
+        causal_mask = torch.tril(att_scores) == 0
+        att_scores[causal_mask] = float("-inf")
+        att_scores = torch.nn.functional.softmax(att_scores, dim = 2)
 
-
-
+        return torch.round(att_scores @ v, decimals = 4)
