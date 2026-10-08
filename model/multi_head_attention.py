@@ -7,27 +7,31 @@ class MultiHeadedSelfAttention(nn.Module):
     def __init__(self, embedding_dim: int, attention_dim: int, num_heads: int):
         super().__init__()
         torch.manual_seed(0)
+        self.attention_head_list = nn.ModuleList()
+        self.num_heads = num_heads
+        self.head_dim = attention_dim // num_heads
+        for _ in range(num_heads):
+            self.attention_head_list.append(self.SingleHeadAttention(embedding_dim, self.head_dim))
+        self.output_projection = nn.Linear(attention_dim, attention_dim, bias = False)
+
         # Create num_heads SingleHeadAttention instances using nn.ModuleList
         # Each head size = attention_dim // num_heads
         # Use: self.SingleHeadAttention(embedding_dim, head_size)
         # After the heads, add an output projection: nn.Linear(attention_dim, attention_dim, bias=False)
-        self.att_heads = nn.ModuleList()
-        for i in range(num_heads):
-            self.att_heads.append(self.SingleHeadAttention(embedding_dim, attention_dim // num_heads))
-        self.output_proj = nn.Linear(attention_dim, attention_dim, bias = False,)
-
-
-
 
     def forward(self, embedded: TensorType[float]) -> TensorType[float]:
         # Run each head on the input, concatenate outputs along dim=2
         # Pass concatenated result through the output projection (W_O)
         # Return result rounded to 4 decimal places
-        head_outputs = []
-        for head in self.att_heads:
-            head_outputs.append(head(embedded))
-        concatenated = torch.cat(head_outputs, dim = 2)
-        return torch.round(self.output_proj(concatenated), decimals = 4)
+        out = []
+        for idx in range(self.num_heads):
+            out_head = self.attention_head_list[idx](embedded)
+            out.append(out_head)
+        multi_head_out = torch.cat(out, dim = 2)
+        return torch.round(self.output_projection(multi_head_out), decimals = 4)
+
+        
+
 
     class SingleHeadAttention(nn.Module):
         def __init__(self, embedding_dim: int, attention_dim: int):
